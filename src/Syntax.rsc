@@ -9,7 +9,7 @@ import List;
  * Concrete syntax of QL
  */
 
-start syntax Form = "form" Id "{" (Question | IfThen | IfThenElse)* "}"; 
+start syntax Form = "form" Id Block; 
 
 // TODO: question, computed question, block, if-then-else, if-then
 syntax Question = Str Id ":" Type t; 
@@ -18,7 +18,7 @@ syntax ComputedQuestion =
 	Str Id ":" "boolean" "=" Boolean
 	| Str Id ":" "integer" "=" Integer;
 
-syntax Block = "{" Question* "}";
+syntax Block = "{" (Question | IfThen | IfThenElse)* "}";
 
 syntax IfThenElse = IfThen "else" Block;
 
