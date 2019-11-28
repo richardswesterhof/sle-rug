@@ -13,14 +13,14 @@ start syntax Form = "form" Id "{" Question* "}";
 // TODO: question, computed question, block, if-then-else, if-then
 syntax Question = Str Id ":" Type t; 
 
-syntax ComputedQuestion = Str Id ":" "boolean" "=" Bool
-	| Str Id ":" "integer" "=" Int;
+syntax ComputedQuestion = Str Id ":" "boolean" "=" Boolean
+	| Str Id ":" "integer" "=" Integer;
 
-syntax Block = "{" Expr* "}";
+syntax Block = "{" Question* "}";
 
 syntax IfThenElse = IfThen "else" Block;
 
-syntax IfThen = "if" "(" Expr ")" Block;
+syntax IfThen = "if" "(" Boolean ")" Block;
 
 // TODO: +, -, *, /, &&, ||, !, >, <, <=, >=, ==, !=, literals (bool, int, str)
 // Think about disambiguation using priorities and associativity
@@ -37,24 +37,27 @@ syntax Type = "integer"
 lexical Str = "\"" ![\n]* "\"";
 
 syntax Integer = 
-	left (Int "*" Int
-	| Int "/" Int)
-	> left (Int "+" Int
-	| Int "-" Int);
+	"(" Integer ")"
+	> left (Integer "*" Integer
+	| Integer "/" Integer)
+	> left (Integer "+" Integer
+	| Integer "-" Integer)
+	> Int;
 	
 syntax Boolean = 
-	right "!" Bool
-	> left (Int "==" Int
-	| Int "!=" Int
-	| Bool "==" Bool
-	| Bool "!= Bool"
+	"(" Boolean ")"
+	> right "!" Boolean
+	> left (Integer "==" Integer
+	| Integer "!=" Integer
+	| Boolean "==" Boolean
+	| Boolean "!=" Boolean
 	| Str "==" Str)
-	> left Expr "&&" Expr
-	> left Expr "||" Expr
-	> left (Int "\>" Int
-	| Int "\<" Int
-	| Int "\<=" Int
-	| Int "\>=" Int);
+	> left Boolean "&&" Boolean
+	> left Boolean "||" Boolean
+	> left (Integer "\>" Integer
+	| Integer "\<" Integer
+	| Integer "\<=" Integer
+	| Integer "\>=" Integer);
 
 lexical Int = [0-9]+;
 
