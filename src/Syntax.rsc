@@ -18,7 +18,7 @@ syntax ComputedQuestion =
 	Str Id ":" "boolean" "=" Boolean
 	| Str Id ":" "integer" "=" Integer;
 
-syntax Block = "{" (Question | IfThen | IfThenElse)* "}";
+syntax Block = "{" (Question | ComputedQuestion | IfThen | IfThenElse)* "}";
 
 syntax IfThenElse = IfThen "else" Block;
 
