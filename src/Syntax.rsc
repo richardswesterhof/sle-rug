@@ -18,11 +18,9 @@ syntax ComputedQuestion =
 	Str Id ":" "boolean" "=" Boolean
 	| Str Id ":" "integer" "=" Integer;
 
-syntax Block = "{" (Question | ComputedQuestion | IfThen | IfThenElse)* "}";
+syntax Block = "{" (Question | ComputedQuestion | IfThenElse)* "}";
 
-syntax IfThenElse = IfThen "else" Block;
-
-syntax IfThen = "if" "(" Boolean ")" Block;
+syntax IfThenElse = "if" "(" Boolean ")" Block ("else" Block)?;
 
 // TODO: +, -, *, /, &&, ||, !, >, <, <=, >=, ==, !=, literals (bool, int, str)
 // Think about disambiguation using priorities and associativity
