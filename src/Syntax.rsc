@@ -1,5 +1,6 @@
 module Syntax
 
+
 extend lang::std::Layout;
 extend lang::std::Id;
 
@@ -12,7 +13,8 @@ start syntax Form = "form" Id "{" Question* "}";
 // TODO: question, computed question, block, if-then-else, if-then
 syntax Question = Str Id ":" Type t; 
 
-syntax ComputedQuestion = Str Id ":" Type t "=" Type t;
+syntax ComputedQuestion = Str Id ":" "boolean" "=" Bool
+	| Str Id ":" "integer" "=" Int;
 
 syntax Block = "{" Expr* "}";
 
@@ -34,14 +36,13 @@ syntax Type = "integer"
   
 lexical Str = "\"" ![\n]* "\"";
 
-lexical Int = 
+syntax Integer = 
 	left (Int "*" Int
 	| Int "/" Int)
 	> left (Int "+" Int
-	| Int "-" Int)
-	> [0-9]+;
-
-lexical Bool = 
+	| Int "-" Int);
+	
+syntax Boolean = 
 	right "!" Bool
 	> left (Int "==" Int
 	| Int "!=" Int
@@ -53,7 +54,8 @@ lexical Bool =
 	> left (Int "\>" Int
 	| Int "\<" Int
 	| Int "\<=" Int
-	| Int "\>=" Int)
-	> "true" 
-	| "false"
-	;
+	| Int "\>=" Int);
+
+lexical Int = [0-9]+;
+
+lexical Bool = "true" | "false";
