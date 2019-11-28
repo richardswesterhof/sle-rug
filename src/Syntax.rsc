@@ -1,14 +1,15 @@
 module Syntax
 
-
 extend lang::std::Layout;
 extend lang::std::Id;
+
+import List;
 
 /*
  * Concrete syntax of QL
  */
 
-start syntax Form = "form" Id "{" Question* "}"; 
+start syntax Form = "form" Id "{" (Question | IfThen | IfThenElse)* "}"; 
 
 // TODO: question, computed question, block, if-then-else, if-then
 syntax Question = Str Id ":" Type t; 
