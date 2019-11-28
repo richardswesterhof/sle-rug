@@ -13,7 +13,8 @@ start syntax Form = "form" Id "{" Question* "}";
 // TODO: question, computed question, block, if-then-else, if-then
 syntax Question = Str Id ":" Type t; 
 
-syntax ComputedQuestion = Str Id ":" "boolean" "=" Boolean
+syntax ComputedQuestion = 
+	Str Id ":" "boolean" "=" Boolean
 	| Str Id ":" "integer" "=" Integer;
 
 syntax Block = "{" Question* "}";
@@ -26,12 +27,12 @@ syntax IfThen = "if" "(" Boolean ")" Block;
 // Think about disambiguation using priorities and associativity
 // and use C/Java style precedence rules (look it up on the internet)
 syntax Expr = Str 
-	| Bool 
-	| Int
-	> Id \ "true" \ "false" // true/false are reserved keywords
-	;
+	| Boolean 
+	| Integer
+	> Id \ "true" \ "false"; // true/false are reserved keywords
   
-syntax Type = "integer" 
+syntax Type = 
+	"integer" 
 	| "boolean";  
   
 lexical Str = "\"" ![\n]* "\"";
@@ -42,7 +43,8 @@ syntax Integer =
 	| Integer "/" Integer)
 	> left (Integer "+" Integer
 	| Integer "-" Integer)
-	> Int;
+	> Int
+	> Id;
 	
 syntax Boolean = 
 	"(" Boolean ")"
@@ -57,8 +59,10 @@ syntax Boolean =
 	> left (Integer "\>" Integer
 	| Integer "\<" Integer
 	| Integer "\<=" Integer
-	| Integer "\>=" Integer);
+	| Integer "\>=" Integer)
+	> Bool
+	> Id \ "true" \ "false";
 
-lexical Int = [0-9]+;
+lexical Int = "-"?[0-9]+;
 
 lexical Bool = "true" | "false";
