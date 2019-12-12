@@ -12,7 +12,7 @@ import List;
 start syntax Form = "form" Id Block; 
 
 // TODO: question, computed question, block, if-then-else, if-then
-syntax Question = Str Id ":" Type t; 
+syntax Question = Str Id ":" Type;
 
 syntax ComputedQuestion = 
 	Str Id ":" "boolean" "=" Boolean
@@ -28,7 +28,7 @@ syntax IfThenElse = "if" "(" Boolean ")" Block ("else" Block)?;
 syntax Expr = Str 
 	| Boolean 
 	| Integer
-	> Id \ "true" \ "false"; // true/false are reserved keywords
+	> Id \ Reserved;
   
 syntax Type = 
 	"integer" 
@@ -60,8 +60,16 @@ syntax Boolean =
 	| Integer "\<=" Integer
 	| Integer "\>=" Integer)
 	> Bool
-	> Id \ "true" \ "false";
+	> Id \ Reserved;
 
 lexical Int = "-"?[0-9]+;
 
 lexical Bool = "true" | "false";
+
+keyword Reserved = "true" 
+	| "false" 
+	| "form" 
+	| "boolean" 
+	| "integer";
+
+
