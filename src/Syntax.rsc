@@ -43,7 +43,7 @@ syntax Integer =
 	> left (Integer "+" Integer
 	| Integer "-" Integer)
 	> Int
-	> Id;
+	> Id \ Reserved;
 	
 syntax Boolean = 
 	"(" Boolean ")"

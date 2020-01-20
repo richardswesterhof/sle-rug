@@ -28,11 +28,25 @@ AQuestion cst2ast(Question q) {
 AExpr cst2ast(Expr e) {
   switch (e) {
     case (Expr)`<Id x>`: return ref(id("<x>", src=x@\loc), src=x@\loc);
+    case (Expr)`<Integer i>`: switch(i) {
+    	case (Integer)`<Int literal>`: return integer(literal, src=literal@\loc);
+    	case (Integer)`<Id identifier>`: return intVar(cst2ast(identifier), src=identifier@\loc);
+    }
     
-    // etc.
+    case (Expr)`<Boolean b>`: switch(i) {
+    	case (Boolean)`<Bool literal>`: return boolean(literal, src=literal@\loc);
+    	case (Integer)`<Id identifier>`: return boolVar(cst2ast(identifier), src=identifier@\loc);
+    }
+    
+    
+        // etc.
     
     default: throw "Unhandled expression: <e>";
   }
+}
+
+AId cst2ast(Id i) {
+	return ref(id("<i>"));
 }
 
 AType cst2ast(Type t) {
