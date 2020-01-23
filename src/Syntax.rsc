@@ -3,64 +3,52 @@ module Syntax
 extend lang::std::Layout;
 extend lang::std::Id;
 
-import List;
 
 /*
  * Concrete syntax of QL
  */
 
-start syntax Form = "form" Id Block; 
+start syntax Form = "form" Id formName Block block; 
 
-// TODO: question, computed question, block, if-then-else, if-then
-syntax Question = Str Id ":" Type;
+syntax Question = Str qText Id identifier ":" Type qType;
 
-syntax ComputedQuestion = 
-	Str Id ":" "boolean" "=" Boolean
-	| Str Id ":" "integer" "=" Integer;
+syntax ComputedQuestion = Question question ("=" Expr computedExpr)?; 
 
-syntax Block = "{" (Question | ComputedQuestion | IfThenElse)* "}";
+syntax Block = @Foldable "{" (Expr e | ComputedQuestion cq | IfThenElse ite | Comment c)* "}";
 
-syntax IfThenElse = "if" "(" Boolean ")" Block ("else" Block)?;
+syntax IfThen = "if" "(" Expr guard ")" Block thenBody;
+
+syntax IfThenElse = IfThen mainPart ("else" Block else)?;
 
 // TODO: +, -, *, /, &&, ||, !, >, <, <=, >=, ==, !=, literals (bool, int, str)
 // Think about disambiguation using priorities and associativity
 // and use C/Java style precedence rules (look it up on the internet)
-syntax Expr = Str 
-	| Boolean 
-	| Integer
-	> Id \ Reserved;
+syntax Expr =
+	"(" Expr ")"
+	> right "!" Expr
+	> left (Expr lhs "*" Expr rhs
+	| Expr lhs "/" Expr rhs
+	| Expr lhs "%" Expr rhs)
+	> left (Expr lhs "+" Expr rhs
+	| Expr lhs "-" Expr rhs)
+	> left (Expr lhs "\>" Expr rhs
+	| Expr lhs "\<" Expr rhs
+	| Expr lhs "\>=" Expr rhs
+	| Expr lhs "\<=" Expr rhs)
+	> left (Expr lhs "==" Expr rhs
+	| Expr lhs "!=" Expr rhs)
+	> left Expr lhs "&&" Expr rhs
+	> left Expr lhs "||" Expr rhs
+	> Str literal
+	| Bool literal
+	| Int literal
+	> Id id \ Reserved;
   
 syntax Type = 
 	"integer" 
 	| "boolean";  
   
 lexical Str = "\"" ![\n]* "\"";
-
-syntax Integer = 
-	"(" Integer ")"
-	> left (Integer "*" Integer
-	| Integer "/" Integer)
-	> left (Integer "+" Integer
-	| Integer "-" Integer)
-	> Int
-	> Id \ Reserved;
-	
-syntax Boolean = 
-	"(" Boolean ")"
-	> right "!" Boolean
-	> left (Integer "==" Integer
-	| Integer "!=" Integer
-	| Boolean "==" Boolean
-	| Boolean "!=" Boolean
-	| Str "==" Str)
-	> left Boolean "&&" Boolean
-	> left Boolean "||" Boolean
-	> left (Integer "\>" Integer
-	| Integer "\<" Integer
-	| Integer "\<=" Integer
-	| Integer "\>=" Integer)
-	> Bool
-	> Id \ Reserved;
 
 lexical Int = "-"?[0-9]+;
 
@@ -69,6 +57,8 @@ lexical Bool = "true" | "false";
 keyword Reserved = "true" 
 	| "false" 
 	| "form" 
+	| "if"
+	| "else"
 	| "boolean" 
 	| "integer";
 

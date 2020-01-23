@@ -26,6 +26,7 @@ void main() {
       if (start[Form] pt := t) {
         AForm ast = cst2ast(pt);
         UseDef useDef = resolve(ast);
+        // change to useDef.usedef(?) if hyperlinking is not working
         set[Message] msgs = check(ast, collect(ast), useDef);
         return t[@messages=msgs][@hyperlinks=useDef];
       }
