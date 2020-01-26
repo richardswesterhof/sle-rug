@@ -42,7 +42,14 @@ set[Message] check(AForm f, TEnv tenv, UseDef useDef) {
 // - duplicate labels should trigger a warning 
 // - the declared type computed questions should match the type of the expression.
 set[Message] check(AQuestion q, TEnv tenv, UseDef useDef) {
-  return {}; 
+  set[Message] msgs = {};
+  switch(q) {
+    case question(str qText, AId name, AType qType): {
+      println(TEnv[name.name]);
+      msgs += {error("Variable \"<name.name>\" is already defined here: <name.src>") | TEnv[name.name] == name.name};
+    }
+    case computedQuestion(str qText, AId name, AType qtype, AExpr computedExpr): ;
+  }
 }
 
 // Check operand compatibility with operators.
@@ -66,7 +73,8 @@ set[Message] check(AExpr e, TEnv tenv, UseDef useDef) {
 	case geq(Expr lhs, Expr rhs): msgs += checkInteger(lhs, rhs);
 	case leq(Expr lhs, Expr rhs): msgs += checkInteger(lhs, rhs);
 	case equals(Expr lhs, Expr rhs): {
-	  lhsType = typeOf(rhs);
+	  lhsType = typeOf(lhs);
+	  rhsType = typeOf(rhs);
 	  msgs += {error("Type <lhsType> does not match Type <rhsType>", e.src) | lhsType != rhsType};
 	}
 	case land(Expr lhs, Expr rhs): msgs += checkBoolean(lhs, rhs);
