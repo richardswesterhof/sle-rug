@@ -3,8 +3,11 @@ module CST2AST
 import Syntax;
 import AST;
 
+import IO;
+
 import ParseTree;
 import String;
+import Boolean;
 
 /*
  * Implement a mapping from concrete syntax trees (CSTs) to abstract syntax trees (ASTs)
@@ -18,7 +21,27 @@ import String;
 
 AForm cst2ast(start[Form] sf) {
   Form f = sf.top; // remove layout before and after form
-  return form("<f.formName>", cst2ast(f.formBody), src=sf@\loc);
+  return form(id("<f.formName>", src=f.formName@\loc), cst2ast(f.formBody), src=f@\loc);
+}
+
+AQuestion cst2ast(Question q) {
+  switch(q) {
+  	case(Question) `<Str qText> <Id identifier> : <Type qType>`: return question("<qText>", cst2ast(identifier), cst2ast(qType), src=q@\loc);
+  	
+  	default: throw "Unhandled question: <q>";
+  }
+}
+
+AQuestion cst2ast(ComputedQuestion q) {
+  switch(q) {
+  	case(ComputedQuestion) `<Question quest>`: return cst2ast(quest);
+  	case(ComputedQuestion) `<Question quest> = <Expr computedExpr>`: {
+  		qAst = cst2ast(quest);
+  		return computedQuestion("<qAst.qText>", qAst.name, qAst.qType, cst2ast(computedExpr), src=q@\loc);
+  	}
+  	
+  	default: throw "Unhandled question: <q>";
+  }
 }
 
 ABlock cst2ast(Block b) {
@@ -29,23 +52,23 @@ ABlock cst2ast(Block b) {
   return block(expressions, questions, ifThens, src=b@\loc);
 }
 
-AQuestion cst2ast(ComputedQuestion q) {
-  switch(q) {
-  	case(ComputedQuestion) `<Question q>`: return cst2ast(q);
-  	case(ComputedQuestion) `<Question q> = <Expr computedExpr>`: {
-  		qAst = cast2ast(q);
-  		return computedQuestion("<q.qText>", q.name, cst2ast(q.qType), cst2ast(computedExpr), src=q@\loc);
-  	}
-  	
-  	default: throw "Unhandled question: <q>";
+AIfThen cst2ast(IfThenElse ite) {
+  switch(ite) {
+    case(IfThenElse) `<IfThen mainPart>`: return cst2ast(mainPart);
+    case(IfThenElse) `<IfThen mainPart> else <Block elseBody>`: {
+      iteAst = cst2ast(mainPart);
+      return ifThenElse(iteAst.guard, iteAst.thenBody, cst2ast(elseBody), src=ite@\loc);
+    }
+  
+    default: throw "Unhandled ifThenElse: <ite>";
   }
 }
 
-AQuestion cst2ast(Question q) {
-  switch(q) {
-  	case(Question) `<Str qText> <Id identifier> : <Type qType>`: return question("<qText>", identifier, cst2ast(qType), src=q@\loc);
-  	
-  	default: throw "Unhandled question: <q>";
+AIfThen cst2ast(IfThen ift) {
+  switch(ift) {
+  	case(IfThen) `if ( <Expr guard> ) <Block thenBody>`: return ifThen(cst2ast(guard), cst2ast(thenBody), src=ift@\loc);
+  
+  	default: throw "Unhandled ifThen: <ift>";
   }
 }
 
@@ -75,14 +98,14 @@ AExpr cst2ast(Expr e) {
   }
 }
 
-AId cst2ast(Id i) {
-	return ref(id("<i>", src=i@\loc), src=i@\loc);
-}
-
 AType cst2ast(Type t) {
   switch(t) {
   	case(Type) `<Type t>`: return typ("<t>", src=t@\loc);
   	
   	default: throw "Unhandled type: <t>";
   	}
+}
+
+AId cst2ast(Id i) {
+	return id("<i>", src=i@\loc);
 }

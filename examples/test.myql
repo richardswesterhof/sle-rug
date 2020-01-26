@@ -1,4 +1,8 @@
 form helloWorld {
-	1+1
-
+	
+	"what is 1+1" answer: integer
+	
+	if(answer > 0) {
+		"what is 2+2" answer2: integer
+	}
 }

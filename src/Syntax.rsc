@@ -24,7 +24,7 @@ syntax BlockElement
 
 syntax IfThen = "if" "(" Expr guard ")" Block thenBody;
 
-syntax IfThenElse = IfThen mainPart ("else" Block else)?;
+syntax IfThenElse = IfThen mainPart ("else" Block elseBody)?;
 
 // TODO: +, -, *, /, &&, ||, !, >, <, <=, >=, ==, !=, literals (bool, int, str)
 // Think about disambiguation using priorities and associativity

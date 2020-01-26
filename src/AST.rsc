@@ -8,7 +8,13 @@ module AST
  */
 
 data AForm(loc src = |tmp:///|) 
-	= form(AId name, ABlock formBody); 
+	= form(AId name, ABlock formBody)
+	; 
+	
+data AQuestion(loc src = |tmp:///|) 
+	= question(str qText, AId name, AType qType) 
+	| computedQuestion(str qText, AId name, AType qType, AExpr computedExpr)
+	;
 	
 data ABlock(loc src = |tmp:///|) 
 	= block(
@@ -16,11 +22,6 @@ data ABlock(loc src = |tmp:///|)
 		list[AQuestion] questions, 
 		list[AIfThen] ifThens
 	);
-
-data AQuestion(loc src = |tmp:///|) 
-	= question(str qText, AId name, AType qType) 
-	| computedQuestion(str qText, AId name, AType qType, AExpr computedExpr)
-	;
 	
 data AIfThen(loc src = |tmp:///|) 
 	= ifThen(AExpr guard, ABlock thenBody)
@@ -48,8 +49,10 @@ data AExpr(loc src = |tmp:///|)
 	;
 
 data AType(loc src = |tmp:///|) 
-	= typ(str typeName);
+	= typ(str typeName)
+	;
 	
 data AId(loc src = |tmp:///|) 
-	= id(str name);
+	= id(str name)
+	;
 
