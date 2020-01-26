@@ -2,7 +2,7 @@ form helloWorld {
 	
 	"what is 1+1" answer: integer
 	
-	if(answer > 0) {
+	if(answer == 2) {
 		"what is 2+2" answer2: integer
 	}
 }
