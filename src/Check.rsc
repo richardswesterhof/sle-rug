@@ -6,8 +6,6 @@ import Message; // see standard library
 
 import util::Math;
 
-import IO;
-
 data Type
   = tint()
   | tbool()
@@ -47,24 +45,29 @@ set[Message] check(AQuestion q, TEnv tenv, UseDef useDef) {
   switch(q) {
     case question(str qText, AId name, AType qType, src = qSrc): {
       for(<loc src, loc varSrc, "<name.name>", str label, Type t> <- tenv) {
-        msgs += {error("Variable \"<name.name>\" is already defined as Type <type2String(t)> on line <varSrc.begin.line>", name.src) 
-                 | t != AType2Type(qType) && name.src.begin.line > varSrc.begin.line};
-                 
-        msgs += {warning("Duplicate label of line <src.begin.line>", qSrc) | qText == label && name.src.begin.line > src.end.line};
+        msgs += checkQuestion(qText, name, qType, qSrc, src, varSrc, label, t);
       }
     }
     case computedQuestion(str qText, AId name, AType qType, AExpr computedExpr, src = qSrc): {
       for(<loc src, loc varSrc, "<name.name>", str label, Type t> <- tenv) {
-        msgs += {error("Variable \"<name.name>\" is already defined as Type <type2String(t)> on line <varSrc.begin.line>", name.src) 
-                 | t != AType2Type(qType) && name.src.begin.line > varSrc.begin.line};
-                 
-        msgs += {warning("Duplicate label of line <src.begin.line>", qSrc) | qText == label && name.src.begin.line > src.end.line};
-      
+        msgs += checkQuestion(qText, name, qType, qSrc, src, varSrc, label, t);
+        
         Type exprType = typeOf(computedExpr, tenv, useDef);
         msgs += {error("Expected Type of expression to be <type2String(AType2Type(qType))>, but got <type2String(exprType)>", computedExpr.src) | exprType != AType2Type(qType)};
       }
     }
   }
+  return msgs;
+}
+
+set[Message] checkQuestion(str qText, AId name, AType qType, loc qSrc, 
+                           loc envQSrc, loc envQVarSrc, str label, Type envQType) {
+  msgs = {};
+  msgs += {error("Variable \"<name.name>\" is already defined as Type <type2String(envQType)> on line <envQVarSrc.begin.line>", name.src) 
+                 | envQType != AType2Type(qType) && name.src.begin.line > envQVarSrc.begin.line};
+                 
+  msgs += {warning("Duplicate label of line <envQSrc.begin.line>", qSrc) | qText == label && name.src.begin.line > envQSrc.end.line};
+  
   return msgs;
 }
 
@@ -125,7 +128,7 @@ Type typeOf(AExpr e, TEnv tenv, UseDef useDef) {
       real earliest = pow(2,64);
       Type typ = tunknown();
       for (<use, loc def> <- useDef, <_, def, _, _, Type t> <- tenv) {
-        typ = typ == tunknown()? t : typ;
+        typ = typ == tunknown() ? t : typ;
         if(def.begin.line < earliest) {
           earliest = toReal(def.begin.line);
           typ = t;
@@ -133,7 +136,7 @@ Type typeOf(AExpr e, TEnv tenv, UseDef useDef) {
       }
       return typ;
     }
-    case neg(AExpr unnegated): return typeOf(unnegated, tenv, useDef) == tbool()? tbool() : tunknown();
+    case neg(AExpr unnegated): return typeOf(unnegated, tenv, useDef) == tbool() ? tbool() : tunknown();
 	case mul(AExpr lhs, AExpr rhs): return (typeOf(lhs, tenv, useDef) == tint() && typeOf(rhs, tenv, useDef) == tint()) ? tint() : tunknown();
 	case div(AExpr lhs, AExpr rhs): return (typeOf(lhs, tenv, useDef) == tint() && typeOf(rhs, tenv, useDef) == tint()) ? tint() : tunknown();
 	case modu(AExpr lhs, AExpr rhs): return (typeOf(lhs, tenv, useDef) == tint() && typeOf(rhs, tenv, useDef) == tint()) ? tint() : tunknown();

@@ -2,8 +2,6 @@ module Resolve
 
 import AST;
 
-import IO;
-
 /*
  * Name resolution for QL
  */ 

@@ -3,8 +3,6 @@ module CST2AST
 import Syntax;
 import AST;
 
-import IO;
-
 import ParseTree;
 import String;
 import Boolean;
