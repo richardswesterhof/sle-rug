@@ -6,10 +6,16 @@ import IO;
 import String;
 import lang::html5::DOM; // see standard library
 
+import util::Resources;
 
+//constants
 str string = "string";
 str boolean = "boolean";
 str integer = "integer";
+
+HTML5Attr attrHidden = html5attr("style", "display: none;");
+str vueUrl = "https://cdn.jsdelivr.net/npm/vue@2.6.11";
+HTML5Node vueCDN = script(src(vueUrl));
 
 /*
  * Implement a compiler for QL to HTML and Javascript
@@ -32,7 +38,9 @@ void compile(AForm f) {
 HTML5Node form2html(AForm f) {
   list[HTML5Node] contents = [];
   contents += block2html(f.formBody);
-  return html(head(title("<f.name.name>"), body(contents)));
+  str fileName = "<substring(f.src.top.file, 0, size(f.src.top.extension) - 1)>";
+  str scriptLoc = "http://localhost:8080/<fileName>.js";
+  return html(head(title("<f.name.name>"), script(src(scriptLoc), \type("module"), html5attr("crossorigin", "anonymous")), vueCDN), body(div(div(contents), id("app"))));
 }
 
 HTML5Node question2html(AQuestion q) {
@@ -45,7 +53,7 @@ HTML5Node question2html(AQuestion q) {
       contents += getInputNode(qType);
     }
     case computedQuestion(str qText, AId name, AType qType, AExpr computedExpr): 
-      contents += p(id(q.src));
+      contents += p("{{message}}", id(q.src));
   }
   
   return div(contents);
@@ -69,20 +77,33 @@ HTML5Node block2html(ABlock b) {
 
 HTML5Node ifThen2html(AIfThen ift) {
   list[HTML5Node] contents = [];
-  contents += div(block2html(ift.thenBody));
-  contents += div(block2html(ift.elseBody));
+  contents += div(block2html(ift.thenBody), class("thenBody"), id("ifThen-<ift.src.begin.line>.thenBody"));
+  contents += div(block2html(ift.elseBody), class("elseBody"), id("ifThen-<ift.src.begin.line>.elseBody"));
   return div(contents);
 }
 
 HTML5Node getInputNode(AType t) {
   switch(t) {
     case typ(string): return input();
-    case typ(boolean): return input(\type("checkbox"));
+    case typ(boolean): return input(\type("checkbox"), onclick("test()"));
     case typ(integer): return input(\type("number"), step("1"));
   }
   return p("[INVALID TYPE: <t.typeName>]");
 }
 
 str form2js(AForm f) {
-  return "";
+  return 
+  "
+  import Vue from \'<vueUrl>/dist/vue.esm.browser.min.js\';
+  var app = new Vue({
+  el: \'#app\',
+  data: {
+    message: \'Hello Vue!\'
+  }
+  });
+  function test() {
+  	console.log(\'this is a test function\');
+  }
+  
+  ";
 }
