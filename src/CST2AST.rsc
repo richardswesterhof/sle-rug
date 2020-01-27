@@ -34,8 +34,8 @@ AQuestion cst2ast(ComputedQuestion q) {
   switch(q) {
   	case(ComputedQuestion) `<Question quest>`: return cst2ast(quest);
   	case(ComputedQuestion) `<Question quest> = <Expr computedExpr>`: {
-  		qAst = cst2ast(quest);
-  		return computedQuestion("<qAst.qText>", qAst.name, qAst.qType, cst2ast(computedExpr), src=q@\loc);
+	  qAst = cst2ast(quest);
+	  return computedQuestion("<qAst.qText>", qAst.name, qAst.qType, cst2ast(computedExpr), src=q@\loc);
   	}
   	
   	default: throw "Unhandled question: <q>";
@@ -52,21 +52,14 @@ ABlock cst2ast(Block b) {
 
 AIfThen cst2ast(IfThenElse ite) {
   switch(ite) {
-    case(IfThenElse) `<IfThen mainPart>`: return cst2ast(mainPart);
-    case(IfThenElse) `<IfThen mainPart> else <Block elseBody>`: {
-      iteAst = cst2ast(mainPart);
-      return ifThenElse(iteAst.guard, iteAst.thenBody, cst2ast(elseBody), src=ite@\loc);
+    case(IfThenElse) `if ( <Expr guard> ) <Block thenBody>`: {
+      return ifThenElse(cst2ast(guard), cst2ast(thenBody), block([], [], []), src=ite@\loc);
+    }
+    case(IfThenElse) `if ( <Expr guard> ) <Block thenBody> else <Block elseBody>`: {
+      return ifThenElse(cst2ast(guard), cst2ast(thenBody), cst2ast(elseBody), src=ite@\loc);
     }
   
     default: throw "Unhandled ifThenElse: <ite>";
-  }
-}
-
-AIfThen cst2ast(IfThen ift) {
-  switch(ift) {
-  	case(IfThen) `if ( <Expr guard> ) <Block thenBody>`: return ifThen(cst2ast(guard), cst2ast(thenBody), src=ift@\loc);
-  
-  	default: throw "Unhandled ifThen: <ift>";
   }
 }
 
@@ -105,5 +98,5 @@ AType cst2ast(Type t) {
 }
 
 AId cst2ast(Id i) {
-	return id("<i>", src=i@\loc);
+  return id("<i>", src=i@\loc);
 }

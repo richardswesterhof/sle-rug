@@ -84,21 +84,12 @@ VEnv eval(AQuestion q, Input inp, VEnv venv) {
   return venv; 
 }
 
-VEnv eval(AIfThen ift, Input inp, VEnv venv) {
-  switch(ift) {
-    case ifThen(AExpr guard, ABlock thenBody): {
-      if(eval(guard, venv).b) {
-        venv += eval(thenBody, inp, venv);
-      }
-    }
-    case ifThenElse(AExpr guard, ABlock thenBody, ABlock elseBody): {
-      if(eval(guard, venv)) {
-        venv += eval(thenBody, inp, venv);
-      }
-      else {
-        venv += eval(elseBody, inp, venv);
-      }
-    }
+VEnv eval(AIfThen ite, Input inp, VEnv venv) {
+  if(eval(ite.guard, venv).b) {
+    venv += eval(ite.thenBody, inp, venv);
+  }
+  else {
+    venv += eval(ite.elseBody, inp, venv);
   }
   return venv;
 }
