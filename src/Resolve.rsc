@@ -40,7 +40,7 @@ Def defs(AForm f) {
   Def defs = {};
   visit(f) {
     case question(str qText, AId name, AType typ): defs += {<name.name, name.src>};
-    case computedQuestion(str qTexy, AId name, AType typ, AExpr computedExpr): defs += {<name.name, name.src>};
+    case computedQuestion(str qText, AId name, AType typ, AExpr computedExpr): defs += {<name.name, name.src>};
   } 
   
   return defs;

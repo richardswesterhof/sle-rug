@@ -3,8 +3,6 @@ form helloWorld {
 	"what is 1+1" answer: integer
 	
 	if(answer == 2) {
-		"what is 2+2" answer2: integer
+		"what is 2+2" answer2: integer = answer < 1
 	}
-	
-	"how many pp can you suck" answer: boolean
 }
