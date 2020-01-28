@@ -35,6 +35,7 @@ set[Message] check(AForm f, TEnv tenv, UseDef useDef) {
   
   visit(f) {
     case AQuestion q: msgs += check(q, tenv, useDef);
+    case AIfThen ift: msgs += checkGuard(ift.guard, tenv, useDef);
     case AExpr e: msgs += check(e, tenv, useDef);
   } 
   return msgs;
@@ -107,6 +108,11 @@ set[Message] check(AExpr e, TEnv tenv, UseDef useDef) {
   return msgs; 
 }
 
+set[Message] checkGuard(AExpr guard, TEnv tenv, UseDef useDef) {
+  Type gType = typeOf(guard, tenv, useDef);
+  return {error("Guard should have Type Boolean, but got <type2String(gType)>", guard.src) | gType != tbool()};
+}
+
 set[Message] checkInteger(AExpr lhs, AExpr rhs, TEnv tenv, UseDef useDef) {
   lhsType = typeOf(lhs, tenv, useDef);
   rhsType = typeOf(rhs, tenv, useDef);
@@ -114,7 +120,7 @@ set[Message] checkInteger(AExpr lhs, AExpr rhs, TEnv tenv, UseDef useDef) {
        + {error("Expected Type to be Integer, but got <type2String(rhsType)>", rhs.src) | rhsType != tint()};
 }
 
-set[Message] checkBoolean(AExpr lhs, AExpr rhs, TEnv tenv, useDef) {
+set[Message] checkBoolean(AExpr lhs, AExpr rhs, TEnv tenv, UseDef useDef) {
   lhsType = typeOf(lhs, tenv, useDef);
   rhsType = typeOf(rhs, tenv, useDef);
   return {error("Expected Boolean, got <type2String(lhsType)>", lhs.src) | lhsType != tbool()} 

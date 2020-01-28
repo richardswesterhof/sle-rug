@@ -1,1 +1,11 @@
-form helloWorld{"yesno"yesNo:boolean=(1==1)if(yesNo){"q1"q1:integer}else{if(1 < 2){"hello there"stringVar:string}}}
+form helloWorld{
+	"yesno" yesNo: boolean
+	if(yesNo) {
+		"q1" q1: integer
+	}
+	else {
+		if(1 < 2) {
+			"hello there" stringVar: string
+  		}
+	}  	
+}
