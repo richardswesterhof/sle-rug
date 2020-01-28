@@ -38,21 +38,15 @@ ABlock flatten(ABlock b){
 	//b.ifThens = flatten;
 
 	//ifs = b.ifThens;
-	ifs = [];
-	for(AIfThen ifs <- b.ifThens) ifs += flatten(ifs);
+	flatIfs = [];
+	for(AIfThen ifs <- b.ifThens) flatIfs += flatten(ifs);
 	
-	for(AQuestion q <- b.questions) ifs += flatten(q);
+	for(AQuestion q <- b.questions) flatIfs += flatten(q);
 	
-	b.ifThens = ifs;
+	b.ifThens = flatIfs;
 	b.questions = [];
 	return b;
 }
-
-/*[AIfThen] flatten([AIfThen] dd){
-	flatIfs = [];
-	for(AIfThen aIf <- ifList) flatIfs + flatten(aIf);
-	return flatIfs;
-}*/
 
 list[AIfThen] flatten(AIfThen ifthn){
 	thenbody = flatten(ifthn.thenBody);
