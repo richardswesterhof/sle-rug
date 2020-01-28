@@ -31,7 +31,7 @@ import ParseTree;
  */
  
 AForm flatten(AForm f) {
-  return form(f.name, flatten(f.formBody)); 
+  return form(f.name, flatten(f.formBody), src=f.src); 
 }
 
 ABlock flatten(ABlock b){
@@ -54,13 +54,13 @@ list[AIfThen] flatten(AIfThen ifthn){
 	
 	flatIfs = [];
 	
-	for(AIfThen ifs <- thenbody.ifThens) flatIfs += ifThenElse(land(ifs.guard, ifthn.guard),ifs.thenBody,ifs.elseBody);
-	for(AIfThen ifs <- elsebody.ifThens) flatIfs += ifThenElse(land(ifs.guard, ifthn.guard),ifs.thenBody,ifs.elseBody);	
+	for(AIfThen ifs <- thenbody.ifThens) flatIfs += ifThenElse(land(ifs.guard, ifthn.guard), ifs.thenBody, ifs.elseBody, src=ifs.src);
+	for(AIfThen ifs <- elsebody.ifThens) flatIfs += ifThenElse(land(ifs.guard, neg(ifthn.guard)), ifs.thenBody, ifs.elseBody, src=ifs.src);	
 	return flatIfs;
 }
 
 AIfThen flatten(AQuestion q){
-	return ifThenElse(cst2ast(parse(#Expr, "true")), block([], [q], []), block([], [], []));
+	return ifThenElse(cst2ast(parse(#Expr, "true")), block([], [q], [], src=q.src), block([], [], [], src=q.src), src=q.src);
 }
 
 /* Rename refactoring:
