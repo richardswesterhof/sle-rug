@@ -113,7 +113,9 @@ HTML5Node block2html(ABlock b) {
   contents = sort(
       contents, 
       bool(OrderedNode a, OrderedNode b) {
-        return (a.src.begin.line < b.src.begin.line || a.src.begin.column < b.src.begin.column);
+        if (a.src.begin.line < b.src.begin.line) return true;
+        else if(a.src.begin.line == b.src.begin.line) return a.src.begin.column < b.src.begin.column; 
+        else return false;
       });
   
   return div([n | <_, HTML5Node n> <- contents]);

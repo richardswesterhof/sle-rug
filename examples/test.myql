@@ -1,11 +1,21 @@
 form helloWorld{
 	"yesno" yesNo: boolean
+	"yesno2" yesNo2: boolean
 	if(yesNo) {
-		"q1" q1: integer
+		"q1" q1: boolean
+		if(q1) {
+		  "q1.1" q1_1: boolean
+		}
+		else {
+		  "q1.2" q1_2: boolean
+		}
 	}
 	else {
-		if(1 < 2) {
-			"hello there" stringVar: string
-  		}
-	}  	
+	  if(yesNo2) {
+		"q2.1" q2_1: boolean
+	  }
+	  else {
+	    "q2.2" q2_2: boolean
+	  }
+	}
 }

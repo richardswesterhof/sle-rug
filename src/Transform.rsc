@@ -39,7 +39,7 @@ ABlock flatten(ABlock b){
 
 	//ifs = b.ifThens;
 	ifs = [];
-	for(AIfThen ifs <- b.ifThens) ifs += flatten(ifs);
+	for(AIfThen i <- b.ifThens) ifs += flatten(i);
 	
 	for(AQuestion q <- b.questions) ifs += flatten(q);
 	
@@ -61,7 +61,7 @@ list[AIfThen] flatten(AIfThen ifthn){
 	flatIfs = [];
 	
 	for(AIfThen ifs <- thenbody.ifThens) flatIfs += ifThenElse(land(ifs.guard, ifthn.guard), ifs.thenBody, ifs.elseBody, src=ifs.src);
-	for(AIfThen ifs <- elsebody.ifThens) flatIfs += ifThenElse(land(ifs.guard, ifthn.guard), ifs.thenBody, ifs.elseBody, src=ifs.src);	
+	for(AIfThen ifs <- elsebody.ifThens) flatIfs += ifThenElse(land(ifs.guard, neg(ifthn.guard)), ifs.thenBody, ifs.elseBody, src=ifs.src);	
 	return flatIfs;
 }
 
