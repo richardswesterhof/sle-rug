@@ -193,11 +193,11 @@ list[str] getNeededComputedVars(AForm f) {
   list[str] computedVars = [];
   visit(f) {
     case AIfThen ite: computedVars += "<getComputedVarName(ite)>() {
-    \t\treturn <prettyPrintExpr(ite.guard, "this")>;
-    \t}";
+	\t\treturn <prettyPrintExpr(ite.guard, "this")>;
+	\t}";
     case AQuestion q: if(q is computedQuestion) computedVars += "<getComputedVarName(q)>() {
-    \t\treturn <prettyPrintExpr(q.computedExpr, "this")>;
-    \t}";
+	\t\treturn <prettyPrintExpr(q.computedExpr, "this")>;
+	\t}";
   }
   
   return computedVars;
