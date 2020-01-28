@@ -1,0 +1,20 @@
+form taxOfficeExample { 
+  "Did you buy a house in 2010?"
+    hasBoughtHouse: boolean
+    
+   
+    // akjsdhakjshdkjsa
+    
+  "Did you enter a loan?"
+    hasMaintLoan: boolean
+    
+  "Did you sell a house in 2010?"
+    hasSoldHouse: boolean
+    
+    if (true) {
+    "What was the selling price?"
+      sellingPrice: integer
+  }
+  else {
+  }
+}
