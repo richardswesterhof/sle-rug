@@ -52,6 +52,8 @@ set[Message] check(AQuestion q, TEnv tenv, UseDef useDef) {
     case computedQuestion(str qText, AId name, AType qType, AExpr computedExpr, src = qSrc): {
       for(<loc src, loc varSrc, "<name.name>", str label, Type t> <- tenv) {
         msgs += checkQuestion(qText, name, qType, qSrc, src, varSrc, label, t);
+        msgs += {warning("Infinite loop: computed question <name.name> on line <src.begin.line> references itself", qSrc) | exprUses(computedExpr, name.name)};
+        list[str] dependencies = getDependencies(computedExpr);
         
         Type exprType = typeOf(computedExpr, tenv, useDef);
         msgs += {error("Expected Type of expression to be <type2String(AType2Type(qType))>, but got <type2String(exprType)>", computedExpr.src) | exprType != AType2Type(qType)};
@@ -68,8 +70,31 @@ set[Message] checkQuestion(str qText, AId name, AType qType, loc qSrc,
                  | envQType != AType2Type(qType) && name.src.begin.line > envQVarSrc.begin.line};
                  
   msgs += {warning("Duplicate label of line <envQSrc.begin.line>", qSrc) | qText == label && name.src.begin.line > envQSrc.end.line};
-  
   return msgs;
+}
+
+bool exprUses(AExpr e, str var) {
+  switch(e) {
+    case neg(AExpr unnegated): return exprUses(unnegated, var);
+    case mul(AExpr lhs, AExpr rhs): return exprUses(lhs, var) || exprUses(rhs, var);
+    case div(AExpr lhs, AExpr rhs): return exprUses(lhs, var) || exprUses(rhs, var);
+    case modu(AExpr lhs, AExpr rhs): return exprUses(lhs, var) || exprUses(rhs, var);
+    case add(AExpr lhs, AExpr rhs): return exprUses(lhs, var) || exprUses(rhs, var);
+    case subtr(AExpr lhs, AExpr rhs): return exprUses(lhs, var) || exprUses(rhs, var);
+    case greater(AExpr lhs, AExpr rhs): return exprUses(lhs, var) || exprUses(rhs, var);
+    case less(AExpr lhs, AExpr rhs): return exprUses(lhs, var) || exprUses(rhs, var);
+    case geq(AExpr lhs, AExpr rhs): return exprUses(lhs, var) || exprUses(rhs, var);
+    case leq(AExpr lhs, AExpr rhs): return exprUses(lhs, var) || exprUses(rhs, var);
+    case equals(AExpr lhs, AExpr rhs): return exprUses(lhs, var) || exprUses(rhs, var);
+    case land(AExpr lhs, AExpr rhs): return exprUses(lhs, var) || exprUses(rhs, var);
+    case lor(AExpr lhs, AExpr rhs): return exprUses(lhs, var) || exprUses(rhs, var);
+    case string(str sVal): return false;
+    case boolean(bool bVal): return false;
+    case integer(int iVal): return false;
+    case ref(AId id): return id.name == var;
+    
+    default: return false;
+  }
 }
 
 // Check operand compatibility with operators.
