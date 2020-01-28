@@ -37,11 +37,32 @@ void compile(AForm f) {
 }
 
 HTML5Node form2html(AForm f) {
-  list[HTML5Node] contents = [];
+  list[HTML5Node] contents = [h1("<f.name.name>")];
   contents += block2html(f.formBody);
   str fileName = "<substring(f.src.top.file, 0, size(f.src.top.extension) - 1)>";
   str scriptLoc = "http://localhost:8080/<fileName>.js";
-  return html(head(title("<f.name.name>"), vueCDN, script(src(scriptLoc), \type("module"), html5attr("crossorigin", "anonymous"))), body(div(div(contents), id("app"))));
+  str cssLoc = "http://localhost:8080/main.css";
+  return html(
+    head(
+      title("<f.name.name>"), 
+      vueCDN, 
+      script(
+        src(scriptLoc), 
+        \type("module"), 
+        html5attr("crossorigin", "anonymous")
+      ),
+      link(
+        \rel("stylesheet"),
+        href("<cssLoc>")
+      )
+    ), 
+    body(
+      div(
+        div(contents), 
+        id("app")
+      )
+    )
+  );
 }
 
 HTML5Node question2html(AQuestion q) {
@@ -58,7 +79,6 @@ HTML5Node question2html(AQuestion q) {
   }
   
   return div(contents);
-
 }
 
 HTML5Node block2html(ABlock b) {
@@ -78,18 +98,41 @@ HTML5Node block2html(ABlock b) {
 
 HTML5Node ifThen2html(AIfThen ift) {
   list[HTML5Node] contents = [];
-  contents += div(block2html(ift.thenBody), class("thenBody"), id("ifThen-<ift.src.begin.line>.thenBody"));
-  contents += div(block2html(ift.elseBody), class("elseBody"), id("ifThen-<ift.src.begin.line>.elseBody"));
-  return div(contents);
+  contents += div(block2html(ift.thenBody), html5attr("v-if", "<prettyPrintExpr(ift.guard)>"), class("thenBody"), id("ifThen-<ift.src.begin.line>.thenBody"));
+  contents += div(block2html(ift.elseBody), html5attr("v-else", "true"), class("elseBody"), id("ifThen-<ift.src.begin.line>.elseBody"));
+  return div(div(contents), class("ifThen"));
 }
 
 HTML5Node getInputNode(AId name, AType t) {
   switch(t) {
-    case typ(string): return input(html5attr("v-model", "<name.name>"), html5attr("@input", "reEval()"));
-    case typ(boolean): return input(\type("checkbox"), html5attr("v-model", "<name.name>"), html5attr("@input", "reEval()"));
-    case typ(integer): return input(\type("number"), step("1"), html5attr("v-model", "<name.name>"), html5attr("@input", "reEval()"));
+    case typ(string): return input(html5attr("v-model", "<name.name>"), html5attr("@input", "reEval(\'<name.name>\')"));
+    case typ(boolean): return input(\type("checkbox"), html5attr("v-model", "<name.name>"), html5attr("@input", "reEval(\'<name.name>\')"));
+    case typ(integer): return input(\type("number"), step("1"), html5attr("v-model", "<name.name>"), html5attr("@input", "reEval(\'<name.name>\')"));
   }
   return p("[INVALID TYPE: <t.typeName>]");
+}
+
+str prettyPrintExpr(AExpr e) {
+  switch(e) {
+    case neg(AExpr unnegated): return "(!<prettyPrintExpr(unnegated)>)";
+    case mul(AExpr lhs, AExpr rhs): return "(<prettyPrintExpr(lhs)> * <prettyPrintExpr(rhs)>)";
+    case div(AExpr lhs, AExpr rhs): return "(<prettyPrintExpr(lhs)> / <prettyPrintExpr(rhs)>)";
+    case modu(AExpr lhs, AExpr rhs): return "(<prettyPrintExpr(lhs)> % <prettyPrintExpr(rhs)>)";
+    case add(AExpr lhs, AExpr rhs): return "(<prettyPrintExpr(lhs)> + <prettyPrintExpr(rhs)>)";
+    case subtr(AExpr lhs, AExpr rhs): return "(<prettyPrintExpr(lhs)> - <prettyPrintExpr(rhs)>)";
+    case greater(AExpr lhs, AExpr rhs): return "(<prettyPrintExpr(lhs)> \> <prettyPrintExpr(rhs)>)";
+    case less(AExpr lhs, AExpr rhs): return "(<prettyPrintExpr(lhs)> \< <prettyPrintExpr(rhs)>)";
+    case geq(AExpr lhs, AExpr rhs): return "(<prettyPrintExpr(lhs)> \>= <prettyPrintExpr(rhs)>)";
+    case leq(AExpr lhs, AExpr rhs): return "(<prettyPrintExpr(lhs)> \<= <prettyPrintExpr(rhs)>)";
+    case equals(AExpr lhs, AExpr rhs): return "(<prettyPrintExpr(lhs)> == <prettyPrintExpr(rhs)>)";
+    case land(AExpr lhs, AExpr rhs): return "(<prettyPrintExpr(lhs)> && <prettyPrintExpr(rhs)>)";
+    case lor(AExpr lhs, AExpr rhs): return "(<prettyPrintExpr(lhs)> || <prettyPrintExpr(rhs)>)";
+    case string(str sVal): return "\'<sVal>\'";
+    case boolean(bool bVal): return "<bVal>";
+    case integer(int iVal): return "<iVal>";
+    case ref(AId id): return "<id.name>";
+  }
+  return "";
 }
 
 str form2js(AForm f) {
@@ -101,8 +144,8 @@ str form2js(AForm f) {
   "test: function() {
 			console.log(\'hello world\');
 		}",
-  "reEval: function() {
-  			console.log(\'environment should be reevaluated\');
+  "reEval: function(varName) {
+  			console.log(varName + \' should be reevaluated\');
   		}"];
 
   return 
