@@ -98,7 +98,7 @@ HTML5Node block2html(ABlock b) {
 
 HTML5Node ifThen2html(AIfThen ift) {
   list[HTML5Node] contents = [];
-  contents += div(block2html(ift.thenBody), html5attr("v-if", "<prettyPrintExpr(ift.guard)>"), class("thenBody"), id("ifThen-<ift.src.begin.line>.thenBody"));
+  contents += div(block2html(ift.thenBody), html5attr("v-if", "<getComputedVarName(ift)>"), class("thenBody"), id("ifThen-<ift.src.begin.line>.thenBody"));
   contents += div(block2html(ift.elseBody), html5attr("v-else", "true"), class("elseBody"), id("ifThen-<ift.src.begin.line>.elseBody"));
   return div(div(contents), class("ifThen"));
 }
@@ -112,32 +112,37 @@ HTML5Node getInputNode(AId name, AType t) {
   return p("[INVALID TYPE: <t.typeName>]");
 }
 
-str prettyPrintExpr(AExpr e) {
+str prettyPrintExpr(AExpr e, str parentName) {
   switch(e) {
-    case neg(AExpr unnegated): return "(!<prettyPrintExpr(unnegated)>)";
-    case mul(AExpr lhs, AExpr rhs): return "(<prettyPrintExpr(lhs)> * <prettyPrintExpr(rhs)>)";
-    case div(AExpr lhs, AExpr rhs): return "(<prettyPrintExpr(lhs)> / <prettyPrintExpr(rhs)>)";
-    case modu(AExpr lhs, AExpr rhs): return "(<prettyPrintExpr(lhs)> % <prettyPrintExpr(rhs)>)";
-    case add(AExpr lhs, AExpr rhs): return "(<prettyPrintExpr(lhs)> + <prettyPrintExpr(rhs)>)";
-    case subtr(AExpr lhs, AExpr rhs): return "(<prettyPrintExpr(lhs)> - <prettyPrintExpr(rhs)>)";
-    case greater(AExpr lhs, AExpr rhs): return "(<prettyPrintExpr(lhs)> \> <prettyPrintExpr(rhs)>)";
-    case less(AExpr lhs, AExpr rhs): return "(<prettyPrintExpr(lhs)> \< <prettyPrintExpr(rhs)>)";
-    case geq(AExpr lhs, AExpr rhs): return "(<prettyPrintExpr(lhs)> \>= <prettyPrintExpr(rhs)>)";
-    case leq(AExpr lhs, AExpr rhs): return "(<prettyPrintExpr(lhs)> \<= <prettyPrintExpr(rhs)>)";
-    case equals(AExpr lhs, AExpr rhs): return "(<prettyPrintExpr(lhs)> == <prettyPrintExpr(rhs)>)";
-    case land(AExpr lhs, AExpr rhs): return "(<prettyPrintExpr(lhs)> && <prettyPrintExpr(rhs)>)";
-    case lor(AExpr lhs, AExpr rhs): return "(<prettyPrintExpr(lhs)> || <prettyPrintExpr(rhs)>)";
+    case neg(AExpr unnegated): return "(!<prettyPrintExpr(unnegated, parentName)>)";
+    case mul(AExpr lhs, AExpr rhs): return "(<prettyPrintExpr(lhs, parentName)> * <prettyPrintExpr(rhs, parentName)>)";
+    case div(AExpr lhs, AExpr rhs): return "(<prettyPrintExpr(lhs, parentName)> / <prettyPrintExpr(rhs, parentName)>)";
+    case modu(AExpr lhs, AExpr rhs): return "(<prettyPrintExpr(lhs, parentName)> % <prettyPrintExpr(rhs, parentName)>)";
+    case add(AExpr lhs, AExpr rhs): return "(<prettyPrintExpr(lhs, parentName)> + <prettyPrintExpr(rhs, parentName)>)";
+    case subtr(AExpr lhs, AExpr rhs): return "(<prettyPrintExpr(lhs, parentName)> - <prettyPrintExpr(rhs, parentName)>)";
+    case greater(AExpr lhs, AExpr rhs): return "(<prettyPrintExpr(lhs, parentName)> \> <prettyPrintExpr(rhs, parentName)>)";
+    case less(AExpr lhs, AExpr rhs): return "(<prettyPrintExpr(lhs, parentName)> \< <prettyPrintExpr(rhs, parentName)>)";
+    case geq(AExpr lhs, AExpr rhs): return "(<prettyPrintExpr(lhs, parentName)> \>= <prettyPrintExpr(rhs, parentName)>)";
+    case leq(AExpr lhs, AExpr rhs): return "(<prettyPrintExpr(lhs, parentName)> \<= <prettyPrintExpr(rhs, parentName)>)";
+    case equals(AExpr lhs, AExpr rhs): return "(<prettyPrintExpr(lhs, parentName)> == <prettyPrintExpr(rhs, parentName)>)";
+    case land(AExpr lhs, AExpr rhs): return "(<prettyPrintExpr(lhs, parentName)> && <prettyPrintExpr(rhs, parentName)>)";
+    case lor(AExpr lhs, AExpr rhs): return "(<prettyPrintExpr(lhs, parentName)> || <prettyPrintExpr(rhs, parentName)>)";
     case string(str sVal): return "\'<sVal>\'";
     case boolean(bool bVal): return "<bVal>";
     case integer(int iVal): return "<iVal>";
-    case ref(AId id): return "<id.name>";
+    case ref(AId id): return (size(parentName) > 0) ? "<parentName>.<id.name>" : "<id.name>";
   }
   return "";
 }
 
 str form2js(AForm f) {
-  //TODO: variables
-  list[str] variables = getNeededVars(resolve(f), initialEnv(f));
+  RefGraph rg = resolve(f);
+  VEnv initialEnv = initialEnv(f);
+  //variables that will be mapped directly to questions
+  list[str] variables = getNeededVars(rg, initialEnv);
+  
+  //computed variables will be mapped to IfThen guards and computed questions
+  list[str] computedVars = getNeededComputedVars(f);
   
   //TODO: methods (if needed);
   list[str] methods = [
@@ -146,7 +151,8 @@ str form2js(AForm f) {
 		}",
   "reEval: function(varName) {
   			console.log(varName + \' should be reevaluated\');
-  		}"];
+  		}"
+  ];
 
   return 
     "//vue.esm.browser.min.js for production, vue.esm.browser.js for development\n" + 
@@ -156,6 +162,10 @@ str form2js(AForm f) {
 	el: \'#app\',
 	data: {
 		<intercalate(",\n\t\t", variables)>
+	},
+	
+	computed: {
+		<intercalate(",\n\t\t", computedVars)>
 	},
   
 	methods: {
@@ -175,4 +185,26 @@ list[str] getNeededVars(RefGraph rg, VEnv venv) {
     }
   }
   return variables;
+}
+
+list[str] getNeededComputedVars(AForm f) {
+  list[str] computedVars = [];
+  visit(f) {
+    case AIfThen ite: computedVars += "<getComputedVarName(ite)>() {
+    \t\treturn <prettyPrintExpr(ite.guard, "this")>;
+    \t}";
+    case AQuestion q: computedVars += "<getComputedVarName(q)>() {
+    
+    }";
+  }
+  
+  return computedVars;
+}
+
+str getComputedVarName(AIfThen ite) {
+  return "__COMPUTED_GUARD_<ite.src.begin.line>_<ite.src.begin.column>";
+}
+
+str getComputedVarName(AQuestion q) {
+  return "__COMPUTED_QUESTION_<q.src.begin.line>_<q.src.begin.column>";
 }
