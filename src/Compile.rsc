@@ -164,45 +164,46 @@ str form2js(AForm f) {
   RefGraph rg = resolve(f);
   VEnv initialEnv = initialEnv(f);
   //variables that will be mapped directly to questions
-  list[str] variables = getNeededVars(rg, initialEnv);
+  list[str] varNames = getVarNames(f, initialEnv);
+  list[str] variables = getInitedVars(varNames, initialEnv);
   
   //computed variables will be mapped to IfThen guards and computed questions
-  list[str] computedVars = getNeededComputedVars(f);
+  list[str] computedVars = getInitedComputedVars(f);
   
   list[str] methods = [
   "submitForm() {
-  			console.log(\'VALUES SUBMITTED \' + new Date());
-			<for(<str name, _> <- rg.defs) {>
-			console.log(\'<name> == \' + this.<name>);
-			<}>
-			console.log(\'END VALUES SUBMITTED\');
-		}"
+  '			console.log(\'VALUES SUBMITTED IN FORM <f.name.name> ON \' + new Date());
+  '			<for(<str name, _> <- rg.defs) {>
+  '			console.log(\'<name> == \' + this.<name>);
+  '			<}>
+  '			console.log(\'END VALUES SUBMITTED\');
+  '		}"
   ];
 
   return 
-    "//vue.esm.browser.min.js for production, vue.esm.browser.js for development\n" + 
-	"import Vue from \'<vueUrl>/dist/vue.esm.browser.js\';\n" +
-	"Vue.config.productionTip = false;\n" +
-	"var app = new Vue({
-	el: \'#app\',
-	data: {
-		<intercalate(",\n\t\t", variables)>
-	},
+    "//vue.esm.browser.min.js for production, vue.esm.browser.js for development\n
+	'import Vue from \'<vueUrl>/dist/vue.esm.browser.js\';\n
+	'Vue.config.productionTip = false;\n
+	'var app = new Vue({
+	'	el: \'#app\',
+	'	data: {
+	'		<intercalate(",\n\t\t", variables)>
+	'	},
 	
-	computed: {
-		<intercalate(",\n\t\t", computedVars)>
-	},
+	'	computed: {
+	'		<intercalate(",\n\t\t", computedVars)>
+	'	},
   
-	methods: {
-		<intercalate(",\n\t\t", methods)>
-	},
-});
-";
+	'	methods: {
+	'		<intercalate(",\n\t\t", methods)>
+	'	},
+	'});
+	";
 }
 
-list[str] getNeededVars(RefGraph rg, VEnv venv) {
+list[str] getInitedVars(list[str] varNames, VEnv venv) {
   list[str] variables = [];
-  for(<str name, _> <- rg.defs) {
+  for(name <- varNames) {
     switch(venv[name]) {
       case vint(int n): variables += "<name>: <n>";
       case vbool(bool b): variables += "<name>: <b>";
@@ -212,7 +213,19 @@ list[str] getNeededVars(RefGraph rg, VEnv venv) {
   return variables;
 }
 
-list[str] getNeededComputedVars(AForm f) {
+list[str] getVarNames(AForm f, VEnv venv) {
+  list[str] varNames = [];
+  // only generate variables for questions; 
+  // computed questions will get a computed varaible
+  visit(f) {
+    case question(str qText, AId name, AType qType): {
+      varNames += "<name.name>";
+    }
+  }
+  return varNames;
+}
+
+list[str] getInitedComputedVars(AForm f) {
   list[str] computedVars = [];
   visit(f) {
     case AIfThen ite: computedVars += "<getComputedVarName(ite)>() {
@@ -231,5 +244,5 @@ str getComputedVarName(AIfThen ite) {
 }
 
 str getComputedVarName(AQuestion q) {
-  return "__COMPUTED_QUESTION_<q.src.begin.line>_<q.src.begin.column>";
+  return q.name.name;
 }
