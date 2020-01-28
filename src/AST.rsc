@@ -28,7 +28,7 @@ data AIfThen(loc src = |tmp:///|)
   ;
 
 data AExpr(loc src = |tmp:///|)
-	= neg(AExpr unnegated)
+  = neg(AExpr unnegated)
   | mul(AExpr lhs, AExpr rhs)
   | div(AExpr lhs, AExpr rhs)
   | modu(AExpr lhs, AExpr rhs)
@@ -45,7 +45,7 @@ data AExpr(loc src = |tmp:///|)
   | boolean(bool bVal)
   | integer(int iVal)
   | ref(AId id)
-	;
+  ;
 
 data AType(loc src = |tmp:///|) 
   = typ(str typeName)

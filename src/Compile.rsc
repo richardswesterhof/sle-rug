@@ -183,7 +183,7 @@ list[str] getNeededVars(RefGraph rg, VEnv venv) {
     switch(venv[name]) {
       case vint(int n): variables += "<name>: <n>";
       case vbool(bool b): variables += "<name>: <b>";
-      case vstr(str s): variables += "<name>: <s>";
+      case vstr(str s): variables += "<name>: \'<s>\'";
     }
   }
   return variables;
