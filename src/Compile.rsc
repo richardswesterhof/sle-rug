@@ -150,7 +150,7 @@ str prettyPrintExpr(AExpr e, str parentName) {
     case equals(AExpr lhs, AExpr rhs): return "(<prettyPrintExpr(lhs, parentName)> == <prettyPrintExpr(rhs, parentName)>)";
     case land(AExpr lhs, AExpr rhs): return "(<prettyPrintExpr(lhs, parentName)> && <prettyPrintExpr(rhs, parentName)>)";
     case lor(AExpr lhs, AExpr rhs): return "(<prettyPrintExpr(lhs, parentName)> || <prettyPrintExpr(rhs, parentName)>)";
-    case string(str sVal): return "\'<sVal>\'";
+    case string(str sVal): return "\'<substring(sVal, 1, size(sVal)-1)>\'";
     case boolean(bool bVal): return "<bVal>";
     case integer(int iVal): return "<iVal>";
     case ref(AId id): return (size(parentName) > 0) ? "<parentName>.<id.name>" : "<id.name>";

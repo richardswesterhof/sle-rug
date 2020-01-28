@@ -1,7 +1,7 @@
 form myForm {
   "first question" q1: string
   
-  if(!q2) {
+  if(q1 == "i") {
     "second question" q2: boolean
   }
   
