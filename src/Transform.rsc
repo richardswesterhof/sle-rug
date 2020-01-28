@@ -3,6 +3,8 @@ module Transform
 import Syntax;
 import Resolve;
 import AST;
+import CST2AST;
+import ParseTree;
 
 /* 
  * Transforming QL forms
@@ -29,7 +31,42 @@ import AST;
  */
  
 AForm flatten(AForm f) {
-  return f; 
+  return form(f.name, flatten(f.formBody)); 
+}
+
+ABlock flatten(ABlock b){
+	//b.ifThens = flatten;
+
+	//ifs = b.ifThens;
+	ifs = [];
+	for(AIfThen ifs <- b.ifThens) ifs += flatten(ifs);
+	
+	for(AQuestion q <- b.questions) ifs += flatten(q);
+	
+	b.ifThens = ifs;
+	b.questions = [];
+	return b;
+}
+
+/*[AIfThen] flatten([AIfThen] dd){
+	flatIfs = [];
+	for(AIfThen aIf <- ifList) flatIfs + flatten(aIf);
+	return flatIfs;
+}*/
+
+list[AIfThen] flatten(AIfThen ifthn){
+	thenbody = flatten(ifthn.thenBody);
+	elsebody = flatten(ifthn.elseBody);
+	
+	flatIfs = [];
+	
+	for(AIfThen ifs <- thenbody.ifThens) flatIfs += ifThenElse(land(ifs.guard, ifthn.guard),ifs.thenBody,ifs.elseBody);
+	for(AIfThen ifs <- elsebody.ifThens) flatIfs += ifThenElse(land(ifs.guard, ifthn.guard),ifs.thenBody,ifs.elseBody);	
+	return flatIfs;
+}
+
+AIfThen flatten(AQuestion q){
+	return ifThenElse(cst2ast(parse(#Expr, "true")), block([], [q], []), block([], [], []));
 }
 
 /* Rename refactoring:
