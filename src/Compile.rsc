@@ -39,7 +39,9 @@ void compile(AForm f) {
 HTML5Node form2html(AForm f) {
   list[HTML5Node] contents = [h1("<f.name.name>")];
   contents += block2html(f.formBody);
-  str fileName = "<substring(f.src.top.file, 0, size(f.src.top.extension) - 1)>";
+  contents += button("submit", html5attr("@click", "submitForm"), class("submit"));
+  //getting the filename without the extension
+  str fileName = "<substring(f.src.top.file, 0, size(f.src.top.file) - size(f.src.top.extension) - 1)>";
   str scriptLoc = "http://localhost:8080/<fileName>.js";
   str cssLoc = "http://localhost:8080/main.css";
   return html(
@@ -74,11 +76,11 @@ HTML5Node question2html(AQuestion q) {
     case question(str qText, AId name, AType qType): {
       contents += getInputNode(name, qType);
     }
-    case computedQuestion(str qText, AId name, AType qType, AExpr computedExpr): 
-      contents += input(html5attr("v-bind:value", "<name.name>"), id(q.src), html5attr("disabled", "true"));
+    case computedQuestion(str qText, AId name, AType qType, AExpr computedExpr, src = qSrc): 
+      contents += input(html5attr("v-model", "<getComputedVarName(q)>"), id(q.src), html5attr("disabled", "true"));
   }
   
-  return div(contents);
+  return div(div(contents), class("question"));
 }
 
 HTML5Node block2html(ABlock b) {
@@ -105,9 +107,9 @@ HTML5Node ifThen2html(AIfThen ift) {
 
 HTML5Node getInputNode(AId name, AType t) {
   switch(t) {
-    case typ(string): return input(html5attr("v-model", "<name.name>"), html5attr("@input", "reEval(\'<name.name>\')"));
-    case typ(boolean): return input(\type("checkbox"), html5attr("v-model", "<name.name>"), html5attr("@input", "reEval(\'<name.name>\')"));
-    case typ(integer): return input(\type("number"), step("1"), html5attr("v-model", "<name.name>"), html5attr("@input", "reEval(\'<name.name>\')"));
+    case typ(string): return input(html5attr("v-model", "<name.name>"));
+    case typ(boolean): return input(\type("checkbox"), html5attr("v-model", "<name.name>"));
+    case typ(integer): return input(\type("number"), step("1"), html5attr("v-model", "<name.name>"));
   }
   return p("[INVALID TYPE: <t.typeName>]");
 }
@@ -144,14 +146,14 @@ str form2js(AForm f) {
   //computed variables will be mapped to IfThen guards and computed questions
   list[str] computedVars = getNeededComputedVars(f);
   
-  //TODO: methods (if needed);
   list[str] methods = [
-  "test: function() {
-			console.log(\'hello world\');
-		}",
-  "reEval: function(varName) {
-  			console.log(varName + \' should be reevaluated\');
-  		}"
+  "submitForm() {
+  			console.log(\'VALUES SUBMITTED \' + new Date());
+			<for(<str name, _> <- rg.defs) {>
+			console.log(\'<name> == \' + this.<name>);
+			<}>
+			console.log(\'END VALUES SUBMITTED\');
+		}"
   ];
 
   return 
@@ -193,9 +195,9 @@ list[str] getNeededComputedVars(AForm f) {
     case AIfThen ite: computedVars += "<getComputedVarName(ite)>() {
     \t\treturn <prettyPrintExpr(ite.guard, "this")>;
     \t}";
-    case AQuestion q: computedVars += "<getComputedVarName(q)>() {
-    
-    }";
+    case AQuestion q: if(q is computedQuestion) computedVars += "<getComputedVarName(q)>() {
+    \t\treturn <prettyPrintExpr(q.computedExpr, "this")>;
+    \t}";
   }
   
   return computedVars;
