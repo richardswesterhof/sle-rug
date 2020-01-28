@@ -55,7 +55,7 @@ syntax Type
   | "boolean"
   | "string";  
   
-lexical Str = "\"" ![\n]* "\"";
+lexical Str = "\"" ![\"]* "\"";
 
 lexical Int = "-"?[0-9]+;
 

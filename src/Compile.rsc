@@ -76,8 +76,17 @@ HTML5Node question2html(AQuestion q) {
     case question(str qText, AId name, AType qType): {
       contents += getInputNode(name, qType);
     }
-    case computedQuestion(str qText, AId name, AType qType, AExpr computedExpr, src = qSrc): 
-      contents += input(html5attr("v-model", "<getComputedVarName(q)>"), id(q.src), html5attr("disabled", "true"));
+    case computedQuestion(str qText, AId name, AType qType, AExpr computedExpr, src = qSrc): {
+        HTML5Node t;
+        switch(qType) {
+          case typ(string): t = \type("text");
+          case typ(boolean): t = \type("checkbox");
+          case typ(integer): t = \type("number");
+          
+          default: t = \type("");
+        } 
+        contents += input(html5attr("v-model", "<getComputedVarName(q)>"), id("computedQuestion_<q.src.begin.line>_<q.src.begin.column>"), html5attr("disabled", "true"), t);
+      }
   }
   
   return div(div(contents), class("question"));
@@ -100,8 +109,8 @@ HTML5Node block2html(ABlock b) {
 
 HTML5Node ifThen2html(AIfThen ift) {
   list[HTML5Node] contents = [];
-  contents += div(block2html(ift.thenBody), html5attr("v-if", "<getComputedVarName(ift)>"), class("thenBody"), id("ifThen-<ift.src.begin.line>.thenBody"));
-  contents += div(block2html(ift.elseBody), html5attr("v-else", "true"), class("elseBody"), id("ifThen-<ift.src.begin.line>.elseBody"));
+  contents += div(block2html(ift.thenBody), html5attr("v-if", "<getComputedVarName(ift)>"), class("thenBody"), id("ifThen_<ift.src.begin.line>_<ift.src.begin.column>.thenBody"));
+  contents += div(block2html(ift.elseBody), html5attr("v-else", "true"), class("elseBody"), id("ifThen_<ift.src.begin.line>_<ift.src.begin.column>.elseBody"));
   return div(div(contents), class("ifThen"));
 }
 

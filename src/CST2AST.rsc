@@ -69,21 +69,21 @@ AExpr cst2ast(Expr e) {
     case(Expr) `<Str literal>`: return string("<literal>", src=literal@\loc);
     case(Expr) `<Bool literal>`: return boolean(fromString("<literal>"), src=literal@\loc);
     case(Expr) `<Int literal>`: return integer(toInt("<literal>"), src=literal@\loc);
-    case(Expr) `( <Expr ex> )`: return cst2ast(ex);
-    case(Expr) `! <Expr ex>`: return neg(cst2ast(ex), src=e@\loc);
-    case(Expr) `<Expr lhs> * <Expr rhs>`: return mul(cst2ast(lhs), cst2ast(rhs), src=e@\loc);
-    case(Expr) `<Expr lhs> / <Expr rhs>`: return div(cst2ast(lhs), cst2ast(rhs), src=e@\loc);
-    case(Expr) `<Expr lhs> % <Expr rhs>`: return modu(cst2ast(lhs), cst2ast(rhs), src=e@\loc);
-    case(Expr) `<Expr lhs> + <Expr rhs>`: return add(cst2ast(lhs), cst2ast(rhs), src=e@\loc);
-    case(Expr) `<Expr lhs> - <Expr rhs>`: return subtr(cst2ast(lhs), cst2ast(rhs), src=e@\loc);
-    case(Expr) `<Expr lhs> \> <Expr rhs>`: return greater(cst2ast(lhs), cst2ast(rhs), src=e@\loc);
-    case(Expr) `<Expr lhs> \< <Expr rhs>`: return less(cst2ast(lhs), cst2ast(rhs), src=e@\loc);
-    case(Expr) `<Expr lhs> \>= <Expr rhs>`: return geq(cst2ast(lhs), cst2ast(rhs), src=e@\loc);
-    case(Expr) `<Expr lhs> \<= <Expr rhs>`: return leq(cst2ast(lhs), cst2ast(rhs), src=e@\loc);
-    case(Expr) `<Expr lhs> == <Expr rhs>`: return equals(cst2ast(lhs), cst2ast(rhs), src=e@\loc);
-    case(Expr) `<Expr lhs> != <Expr rhs>`: return neg(equals(cst2ast(lhs), cst2ast(rhs), src=e@\loc), src=e@\loc);
-    case(Expr) `<Expr lhs> && <Expr rhs>`: return land(cst2ast(lhs), cst2ast(rhs), src=e@\loc);
-    case(Expr) `<Expr lhs> || <Expr rhs>`: return lor(cst2ast(lhs), cst2ast(rhs), src=e@\loc);
+    case(Expr) `(<Expr ex>)`: return cst2ast(ex);
+    case(Expr) `!<Expr ex>`: return neg(cst2ast(ex), src=e@\loc);
+    case(Expr) `<Expr lhs>*<Expr rhs>`: return mul(cst2ast(lhs), cst2ast(rhs), src=e@\loc);
+    case(Expr) `<Expr lhs>/<Expr rhs>`: return div(cst2ast(lhs), cst2ast(rhs), src=e@\loc);
+    case(Expr) `<Expr lhs>%<Expr rhs>`: return modu(cst2ast(lhs), cst2ast(rhs), src=e@\loc);
+    case(Expr) `<Expr lhs>+<Expr rhs>`: return add(cst2ast(lhs), cst2ast(rhs), src=e@\loc);
+    case(Expr) `<Expr lhs>-<Expr rhs>`: return subtr(cst2ast(lhs), cst2ast(rhs), src=e@\loc);
+    case(Expr) `<Expr lhs>\><Expr rhs>`: return greater(cst2ast(lhs), cst2ast(rhs), src=e@\loc);
+    case(Expr) `<Expr lhs>\<<Expr rhs>`: return less(cst2ast(lhs), cst2ast(rhs), src=e@\loc);
+    case(Expr) `<Expr lhs>\>=<Expr rhs>`: return geq(cst2ast(lhs), cst2ast(rhs), src=e@\loc);
+    case(Expr) `<Expr lhs>\<=<Expr rhs>`: return leq(cst2ast(lhs), cst2ast(rhs), src=e@\loc);
+    case(Expr) `<Expr lhs>==<Expr rhs>`: return equals(cst2ast(lhs), cst2ast(rhs), src=e@\loc);
+    case(Expr) `<Expr lhs>!=<Expr rhs>`: return neg(equals(cst2ast(lhs), cst2ast(rhs), src=e@\loc), src=e@\loc);
+    case(Expr) `<Expr lhs>&&<Expr rhs>`: return land(cst2ast(lhs), cst2ast(rhs), src=e@\loc);
+    case(Expr) `<Expr lhs>||<Expr rhs>`: return lor(cst2ast(lhs), cst2ast(rhs), src=e@\loc);
     
     default: throw "Unhandled expression: <e>";
   }
