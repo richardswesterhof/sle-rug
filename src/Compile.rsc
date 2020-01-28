@@ -10,6 +10,8 @@ import util::Resources;
 import List;
 import Eval;
 
+import IO;
+
 //constants
 str string = "string";
 str boolean = "boolean";
@@ -17,6 +19,8 @@ str integer = "integer";
 
 str vueUrl = "https://cdn.jsdelivr.net/npm/vue@2.6.11";
 HTML5Node vueCDN = script(src(vueUrl));
+
+alias OrderedNode = tuple[loc src, HTML5Node htmlNode];
 
 /*
  * Implement a compiler for QL to HTML and Javascript
@@ -93,18 +97,26 @@ HTML5Node question2html(AQuestion q) {
 }
 
 HTML5Node block2html(ABlock b) {
-  list[HTML5Node] contents = [];
+  list[OrderedNode] contents = [];
   // top level questions
   for(AQuestion q <- b.questions) {
-    contents += question2html(q);
+    contents += [<q.src, question2html(q)>];
   }
   
   // questions inside ifThens
   for(AIfThen ift <- b.ifThens) {
-    contents += ifThen2html(ift);
+    contents += [<ift.src, ifThen2html(ift)>];
   }
   
-  return div(contents);
+  // sort the nodes by source location 
+  // to preserve the proper order as written in the QL source code
+  contents = sort(
+      contents, 
+      bool(OrderedNode a, OrderedNode b) {
+        return (a.src.begin.line < b.src.begin.line || a.src.begin.column < b.src.begin.column);
+      });
+  
+  return div([n | <_, HTML5Node n> <- contents]);
 }
 
 HTML5Node ifThen2html(AIfThen ift) {
