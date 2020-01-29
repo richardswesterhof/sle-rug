@@ -53,7 +53,6 @@ set[Message] check(AQuestion q, TEnv tenv, UseDef useDef) {
       for(<loc src, loc varSrc, "<name.name>", str label, Type t> <- tenv) {
         msgs += checkQuestion(qText, name, qType, qSrc, src, varSrc, label, t);
         msgs += {warning("Infinite loop: computed question <name.name> on line <src.begin.line> references itself", qSrc) | exprUses(computedExpr, name.name)};
-        list[str] dependencies = getDependencies(computedExpr);
         
         Type exprType = typeOf(computedExpr, tenv, useDef);
         msgs += {error("Expected Type of expression to be <type2String(AType2Type(qType))>, but got <type2String(exprType)>", computedExpr.src) | exprType != AType2Type(qType)};
