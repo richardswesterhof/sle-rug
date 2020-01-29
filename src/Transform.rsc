@@ -5,6 +5,9 @@ import Resolve;
 import AST;
 import CST2AST;
 import ParseTree;
+import Relation;
+import Set;
+import IO;
 
 /* 
  * Transforming QL forms
@@ -70,10 +73,95 @@ AIfThen flatten(AQuestion q){
  *
  */
  
- start[Form] rename(start[Form] f, loc useOrDef, str newName, UseDef useDef) {
+ start[Form] rename(start[Form] f, loc useOrDef, str newName/*, UseDef useDef*/) {
+ 	AForm form = cst2ast(f);
+ 	
+ 	r = resolve(form);
+ 	//ds = resolve(form).defs;
+ 	
+ 	//text = "";
+ 	//get all def strings of location
+ 	//invert(r.defs)[l]
+ 	
+ 	//get all use strings of location
+ 	//r.uses[l]
+ 	
+ 	//get all strings of location
+ 	g = r.uses[useOrDef] + invert(r.defs)[useOrDef];
+ 	
+ 	//get all uses with string
+ 	//invert(r.uses)[g]
+ 	
+ 	//get all defs with string
+ 	//r.defs[g]
+ 	
+ 	//get all loc's of defs and uses SORTED and reversed
+ 	//we want to change from the bottom so the location before don't change
+ 	//locs = ;
+ 	locs = reverse(sort(r.defs[g] + invert(r.uses)[g]));
+ 	
+ 	for(loc l <- locs) writeFile(l,newName);
+ 	
+ 	/*
+ 	contents = sort(
+      contents, 
+      bool(OrderedNode a, OrderedNode b) {
+        if (a.src.begin.line < b.src.begin.line) return true;
+        else if(a.src.begin.line == b.src.begin.line) return a.src.begin.column < b.src.begin.column; 
+        else return false;
+      });
+ 	
+ 	*/
+ 	
+ 	//invert(r.uses)[r.uses[|project://QL/examples/custom.myql|(168,12,<9,8>,<9,20>)]];
+ 	
+ 	//for(Use u <- us) if(u.use == useOrDef) text = u.name;
+ 	
+ 	//for(Use u <- uses) print(u.name);
+ 
+ 	//useDef = reverse(useDef);
+ 	
+ 	//for(Use u <- useDef) print("in us"); 	
+ 	
    return f; 
- } 
+ }
+ 
+ list[loc] testt(start[Form] f, loc useOrDef, str newName/*, UseDef useDef*/) {
+ 	AForm form = cst2ast(f);
+ 	
+ 	r = resolve(form);
+ 	//get all strings of location
+ 	g = r.uses[useOrDef] + invert(r.defs)[useOrDef];
+ 	
+ 	//get all loc's of defs and uses SORTED and reversed
+ 	//we want to change from the bottom so the location before don't change
+ 	locs = reverse(sort(r.defs[g] + invert(r.uses)[g]));
+ 	
+ 		
+ 	//invert(r.uses)[r.uses[|project://QL/examples/custom.myql|(168,12,<9,8>,<9,20>)]];
+ 	
+ 	//for(Use u <- us) if(u.use == useOrDef) text = u.name;
+ 	
+ 	//for(Use u <- uses) print(u.name);
+ 
+ 	//useDef = reverse(useDef);
+ 	
+ 	//for(Use u <- useDef) print("in us"); 	
+ 	
+   return locs; 
+ }
+ 
+ 
+ str replace(loc l, str newName){
+ 	visit(l){
+ 		default: writeFile(l,newName);
+ 	}
+ 	
+ 
+ 	return;
+ }
  
  
  
-
+ 
+ 
