@@ -8,39 +8,12 @@ import ParseTree;
 import Relation;
 import Set;
 import IO;
-
-/* 
- * Transforming QL forms
- */
- 
- 
-/* Normalization:
- *  wrt to the semantics of QL the following
- *     q0: "" int; 
- *     if (a) { 
- *        if (b) { 
- *          q1: "" int; 
- *        } 
- *        q2: "" int; 
- *      }
- *
- *  is equivalent to
- *     if (true) q0: "" int;
- *     if (true && a && b) q1: "" int;
- *     if (true && a) q2: "" int;
- *
- * Write a transformation that performs this flattening transformation.
- *
- */
  
 AForm flatten(AForm f) {
   return form(f.name, flatten(f.formBody), src=f.src); 
 }
 
 ABlock flatten(ABlock b){
-	//b.ifThens = flatten;
-
-	//ifs = b.ifThens;
 	flatIfs = [];
 	for(AIfThen ifs <- b.ifThens) flatIfs += flatten(ifs);
 	
@@ -65,36 +38,29 @@ list[AIfThen] flatten(AIfThen ifthn){
 AIfThen flatten(AQuestion q){
 	return ifThenElse(cst2ast(parse(#Expr, "true")), block([], [q], [], src=q.src), block([], [], [], src=q.src), src=q.src);
 }
+ 
+start[Form] rename(start[Form] f, loc useOrDef, str newName) {
+	AForm form = cst2ast(f);
+	
+	r = resolve(form);
+	
+	//get all strings of location
+	g = r.uses[useOrDef] + invert(r.defs)[useOrDef];
+	
+	//get all loc's of defs and uses SORTED and reversed
+	//we want to change from the bottom so the location before don't change
+	locs = reverse(sort(r.defs[g] + invert(r.uses)[g]));
+	
+	for(loc l <- locs) writeFile(l,newName);
+	
+	  return f; 
+} 
+ 
+str replace(loc l, str newName){
+	visit(l){
+		default: writeFile(l,newName);
+	}
+	
 
-/* Rename refactoring:
- *
- * Write a refactoring transformation that consistently renames all occurrences of the same name.
- * Use the results of name resolution to find the equivalence class of a name.
- *
- */
- 
- start[Form] rename(start[Form] f, loc useOrDef, str newName) {
- 	AForm form = cst2ast(f);
- 	
- 	r = resolve(form);
- 	
- 	//get all strings of location
- 	g = r.uses[useOrDef] + invert(r.defs)[useOrDef];
- 	
- 	//get all loc's of defs and uses SORTED and reversed
- 	//we want to change from the bottom so the location before don't change
- 	locs = reverse(sort(r.defs[g] + invert(r.uses)[g]));
- 	
- 	for(loc l <- locs) writeFile(l,newName);
- 	
- 	  return f; 
- } 
- 
- str replace(loc l, str newName){
- 	visit(l){
- 		default: writeFile(l,newName);
- 	}
- 	
- 
- 	return;
- }
+	return;
+}

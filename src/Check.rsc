@@ -203,18 +203,3 @@ Type AType2Type(AType t) {
   }
   return tunknown();
 }
-
-/* 
- * Pattern-based dispatch style:
- * 
- * Type typeOf(ref(id(_, src = loc u)), TEnv tenv, UseDef useDef) = t
- *   when <u, loc d> <- useDef, <d, x, _, Type t> <- tenv
- *
- * ... etc.
- * 
- * default Type typeOf(AExpr _, TEnv _, UseDef _) = tunknown();
- *
- */
- 
- 
-

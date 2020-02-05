@@ -5,12 +5,6 @@ import Resolve;
 
 import IO;
 
-/*
- * Implement big-step semantics for QL
- */
- 
-// NB: Eval may assume the form is type- and name-correct.
-
 //constants
 str string = "string";
 str boolean = "boolean";

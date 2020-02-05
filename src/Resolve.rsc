@@ -2,11 +2,6 @@ module Resolve
 
 import AST;
 
-/*
- * Name resolution for QL
- */ 
-
-
 // modeling declaring occurrences of names
 alias Def = rel[str name, loc def];
 
