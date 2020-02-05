@@ -1,0 +1,9 @@
+form myForm {
+  "first question" q1: string
+  
+  if(q1 == "i") {
+    "second question" q2: boolean
+  }
+  
+  "third question" q4: boolean
+}

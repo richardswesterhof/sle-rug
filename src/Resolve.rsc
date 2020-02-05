@@ -2,11 +2,6 @@ module Resolve
 
 import AST;
 
-/*
- * Name resolution for QL
- */ 
-
-
 // modeling declaring occurrences of names
 alias Def = rel[str name, loc def];
 
@@ -26,9 +21,20 @@ RefGraph resolve(AForm f) = <us, ds, us o ds>
   when Use us := uses(f), Def ds := defs(f);
 
 Use uses(AForm f) {
-  return {}; 
+  Use uses = {};
+  visit(f) {
+    case ref(AId i): uses += {<i.src, i.name>};
+  }
+  
+  return uses;
 }
 
 Def defs(AForm f) {
-  return {}; 
+  Def defs = {};
+  visit(f) {
+    case question(str qText, AId name, AType typ): defs += {<name.name, name.src>};
+    case computedQuestion(str qText, AId name, AType typ, AExpr computedExpr): defs += {<name.name, name.src>};
+  } 
+  
+  return defs;
 }

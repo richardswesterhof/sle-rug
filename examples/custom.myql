@@ -2,7 +2,6 @@ form taxOfficeExample {
   "Did you buy a house in 2010?"
     hasBoughtHouse: boolean
     
-    
    
     // akjsdhakjshdkjsa
     
@@ -11,19 +10,11 @@ form taxOfficeExample {
     
   "Did you sell a house in 2010?"
     hasSoldHouse: boolean
-   
-  if (hasSoldHouse) {
+    
+    if (true) {
     "What was the selling price?"
       sellingPrice: integer
-    "Private debts for the sold house:"
-      privateDebt: integer
-    "Value residue:"
-      valueResidue: integer = sellingPrice - privateDebt
-      
   }
   else {
-    "this is the else branch" stringVar: string "df" hello: integer
   }
-  
-  "this question should be last" lastQuestion: integer
 }
